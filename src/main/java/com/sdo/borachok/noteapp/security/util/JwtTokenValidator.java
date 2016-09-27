@@ -16,22 +16,17 @@ public class JwtTokenValidator {
 	private String secret;
 
 	public JwtUserDto parseToken(String token) {
-		JwtUserDto user = null;
 
-		System.out.println("****** JwtTokenValidator token : " + token);
+		JwtUserDto user = null;
 
 		try {
 			Claims body = Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
-
-			System.out.println("****** JwtTokenValidator body " + body);
 
 			user = new JwtUserDto();
 			user.setEmail(body.getSubject());
 			user.setId(Integer.parseInt((String) body.get("userId")));
 			user.setPassword((String) body.get("password"));
 			user.setRole((String) body.get("role"));
-
-			System.out.println("****** JwtTokenValidator user " + user);
 
 		} catch (JwtException e) {
 			e.printStackTrace();

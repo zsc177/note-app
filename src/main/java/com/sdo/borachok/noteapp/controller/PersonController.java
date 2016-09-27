@@ -87,7 +87,6 @@ public class PersonController {
 	@RequestMapping(method = POST)
 	public ResponseEntity<Person> create(@RequestBody @Valid Person person, UriComponentsBuilder ucBuilder) {
 
-		System.out.println("---------------in post------------");
 		if (personService.isExist(person)) {
 			throw new EmailAlreadyExistException();
 		}

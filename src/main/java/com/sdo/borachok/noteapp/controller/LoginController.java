@@ -31,24 +31,17 @@ public class LoginController {
 	@RequestMapping(method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	public ResponseEntity<String> login(@RequestBody Person person) {
 
-		// Person person = new Person();
-		// person.setEmail(email);
-		// person.setPassword(password);
-		//
-		// if(personService.isExist(person)) {
-		// return new ResponseEntity<String>(HttpStatus.CONFLICT);
-		// }
-		//
-		// person = personService.create(person);
+		Person currentPerson = personService.getByEmail(person.getEmail());
 
-		person = personService.getByEmail(person.getEmail());
-
-		if (person == null) {
+		if (currentPerson == null) {
 			return new ResponseEntity<String>(HttpStatus.NOT_FOUND);
-
 		}
 
-		JwtUserDto userDto = converter.convert(person);
+		if (!currentPerson.getPassword().equals(person.getPassword())) {
+			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+		}
+
+		JwtUserDto userDto = converter.convert(currentPerson);
 
 		String stringToken = JwtTokenGenerator.generateToken(userDto, SECRET);
 		String jsonToken = "{\"token\":\"" + stringToken + "\"}";

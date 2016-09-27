@@ -37,6 +37,12 @@ public class TestDataInitializer {
 		person2.setRole("user");
 		personRepository.save(person2);
 
+		Person person3 = new Person();
+		person3.setEmail("person3@gmail.com");
+		person3.setPassword("person3pass");
+		person3.setRole("user");
+		personRepository.save(person3);
+
 		Note note1 = new Note();
 		note1.setDate(LocalDate.of(2016, Month.JULY, 12));
 		note1.setTitle("note1");
@@ -57,6 +63,20 @@ public class TestDataInitializer {
 		note3.setText("note3 text");
 		note3.setAuthor(person2);
 		noteRepository.save(note3);
+
+		Note note4 = new Note();
+		note4.setDate(LocalDate.of(2014, Month.AUGUST, 21));
+		note4.setTitle("note4");
+		note4.setText("note4 text");
+		note4.setAuthor(person3);
+		noteRepository.save(note4);
+
+		Note note5 = new Note();
+		note5.setDate(LocalDate.of(2016, Month.APRIL, 07));
+		note5.setTitle("note5");
+		note5.setText("note5 text");
+		note5.setAuthor(person3);
+		noteRepository.save(note5);
 	}
 
 }
