@@ -3,7 +3,6 @@ package com.sdo.borachok.noteapp.controller;
 import static org.springframework.http.HttpStatus.OK;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.sdo.borachok.noteapp.converter.PersonToJwtUserDtoConverter;
 import com.sdo.borachok.noteapp.model.person.Person;
+import com.sdo.borachok.noteapp.model.person.exception.IncorrectLoginOrPasswordException;
 import com.sdo.borachok.noteapp.security.transfer.JwtUserDto;
 import com.sdo.borachok.noteapp.security.util.JwtTokenGenerator;
 import com.sdo.borachok.noteapp.service.PersonService;
@@ -33,12 +33,8 @@ public class LoginController {
 
 		Person currentPerson = personService.getByEmail(person.getEmail());
 
-		if (currentPerson == null) {
-			return new ResponseEntity<String>(HttpStatus.NOT_FOUND);
-		}
-
-		if (!currentPerson.getPassword().equals(person.getPassword())) {
-			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+		if (currentPerson == null || !currentPerson.getPassword().equals(person.getPassword())) {
+			throw new IncorrectLoginOrPasswordException();
 		}
 
 		JwtUserDto userDto = converter.convert(currentPerson);
