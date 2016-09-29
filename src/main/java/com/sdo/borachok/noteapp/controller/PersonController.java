@@ -1,7 +1,6 @@
 package com.sdo.borachok.noteapp.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.sdo.borachok.noteapp.model.person.Person;
-import com.sdo.borachok.noteapp.model.person.exception.EmailAlreadyExistException;
 import com.sdo.borachok.noteapp.service.PersonService;
 
 @Controller
@@ -40,10 +38,6 @@ public class PersonController {
 
 		List<Person> persons = personService.getAll();
 
-		if (persons == null || persons.isEmpty()) {
-			return new ResponseEntity<List<Person>>(NOT_FOUND);
-		}
-
 		return new ResponseEntity<List<Person>>(persons, OK);
 	}
 
@@ -53,26 +47,16 @@ public class PersonController {
 
 		Person person = personService.getById(id);
 
-		if (person == null) {
-			return new ResponseEntity<Person>(NOT_FOUND);
-		}
-
 		return new ResponseEntity<Person>(person, OK);
 	}
 
 	@PreAuthorize("hasAuthority('admin') OR #id == principal.id")
 	@RequestMapping(value = "/{id}", method = DELETE)
-	public ResponseEntity<Person> delete(@PathVariable("id") Integer id) {
-
-		Person person = personService.getById(id);
-
-		if (person == null) {
-			return new ResponseEntity<Person>(NOT_FOUND);
-		}
+	public ResponseEntity<Void> delete(@PathVariable("id") Integer id) {
 
 		personService.delete(id);
 
-		return new ResponseEntity<Person>(NO_CONTENT);
+		return new ResponseEntity<Void>(NO_CONTENT);
 	}
 
 	@PreAuthorize("hasAuthority('admin')")
@@ -87,13 +71,6 @@ public class PersonController {
 	@RequestMapping(method = POST)
 	public ResponseEntity<Person> create(@RequestBody @Valid Person person, UriComponentsBuilder ucBuilder) {
 
-		if (personService.isExist(person)) {
-			throw new EmailAlreadyExistException();
-		}
-
-		// TODO: make some logic here to avoid role changing by default user
-		person.setRole("user");
-
 		personService.create(person);
 
 		HttpHeaders headers = new HttpHeaders();
@@ -106,22 +83,7 @@ public class PersonController {
 	@RequestMapping(value = "/{id}", method = PUT)
 	public ResponseEntity<Person> update(@PathVariable("id") Integer id, @RequestBody @Valid Person person) {
 
-		Person currentPerson = personService.getById(id);
-
-		if (currentPerson == null) {
-			return new ResponseEntity<Person>(NOT_FOUND);
-		}
-
-		if (personService.isExist(person) && !person.getEmail().equals(currentPerson.getEmail())) {
-			throw new EmailAlreadyExistException();
-		}
-
-		person.setId(currentPerson.getId());
-
-		// TODO: make some logic here to avoid role changing by default user
-		person.setRole("user");
-
-		personService.update(person);
+		personService.update(id, person);
 
 		return new ResponseEntity<Person>(person, OK);
 	}

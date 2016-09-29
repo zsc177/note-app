@@ -18,7 +18,7 @@ public interface PersonService {
 
 	public Person create(Person person);
 
-	public Person update(Person person);
+	public Person update(Integer id, Person person);
 
 	public boolean isExist(Person person);
 

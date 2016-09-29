@@ -9,39 +9,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.sdo.borachok.noteapp.converter.PersonToJwtUserDtoConverter;
 import com.sdo.borachok.noteapp.model.person.Person;
-import com.sdo.borachok.noteapp.model.person.exception.IncorrectLoginOrPasswordException;
-import com.sdo.borachok.noteapp.security.transfer.JwtUserDto;
-import com.sdo.borachok.noteapp.security.util.JwtTokenGenerator;
-import com.sdo.borachok.noteapp.service.PersonService;
+import com.sdo.borachok.noteapp.service.TokenService;
 
 @Controller
 @RequestMapping("/login")
 public class LoginController {
 
-	private static final String SECRET = "note-app-secret-code";
-
 	@Autowired
-	private PersonService personService;
-
-	@Autowired
-	private PersonToJwtUserDtoConverter converter;
+	private TokenService tokenService;
 
 	@RequestMapping(method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
 	public ResponseEntity<String> login(@RequestBody Person person) {
 
-		Person currentPerson = personService.getByEmail(person.getEmail());
+		String token = tokenService.generateToken(person);
 
-		if (currentPerson == null || !currentPerson.getPassword().equals(person.getPassword())) {
-			throw new IncorrectLoginOrPasswordException();
-		}
-
-		JwtUserDto userDto = converter.convert(currentPerson);
-
-		String stringToken = JwtTokenGenerator.generateToken(userDto, SECRET);
-		String jsonToken = "{\"token\":\"" + stringToken + "\"}";
-
-		return new ResponseEntity<String>(jsonToken, OK);
+		return new ResponseEntity<String>(token, OK);
 	}
 }

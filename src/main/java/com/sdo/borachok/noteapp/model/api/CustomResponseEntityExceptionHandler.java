@@ -3,6 +3,7 @@ package com.sdo.borachok.noteapp.model.api;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 import java.time.Instant;
@@ -18,6 +19,14 @@ import com.sdo.borachok.noteapp.model.person.exception.IncorrectLoginOrPasswordE
 
 @ControllerAdvice
 public class CustomResponseEntityExceptionHandler {
+
+	@ExceptionHandler({ ResourceNotFoundException.class })
+	public ResponseEntity<ApiError> handleResourceNotFoundException(ResourceNotFoundException ex) {
+
+		ApiError apiError = new ApiError(NOT_FOUND, ex.getLocalizedMessage(), Instant.now());
+
+		return new ResponseEntity<ApiError>(apiError, apiError.getStatus());
+	}
 
 	@ExceptionHandler({ EmailAlreadyExistException.class })
 	public ResponseEntity<ApiError> handleEmailAlreadyExistException(EmailAlreadyExistException ex) {

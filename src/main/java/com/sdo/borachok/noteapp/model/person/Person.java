@@ -2,6 +2,7 @@ package com.sdo.borachok.noteapp.model.person;
 
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -35,7 +36,7 @@ public class Person {
 
 	private String role;
 
-	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
 	@JsonIgnore
 	private List<Note> notes;
 
