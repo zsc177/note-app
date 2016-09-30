@@ -75,4 +75,9 @@ public class AuthenticatedUser implements UserDetails {
 		return null;
 	}
 
+	@Override
+	public String toString() {
+		return "AuthenticatedUser [id=" + id + ", username=" + username + ", token=" + token + "]";
+	}
+
 }

@@ -14,7 +14,7 @@ public interface NoteService {
 
 	public void delete(Integer id);
 
-	public void deleteAll();
+	public void deleteAll(Integer authorId);
 
 	public Note create(Integer authorId, Note note);
 

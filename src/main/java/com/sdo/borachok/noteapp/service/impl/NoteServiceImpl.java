@@ -35,8 +35,16 @@ public class NoteServiceImpl implements NoteService {
 		return notes;
 	}
 
+	@Override
 	public List<Note> getByAuthorId(Integer id) {
-		return noteRepository.findByAuthorId(id);
+
+		List<Note> notes = noteRepository.findByAuthorId(id);
+
+		if (notes == null || notes.isEmpty()) {
+			throw new NoteNotFoundException();
+		}
+
+		return notes;
 	}
 
 	@Override
@@ -61,8 +69,11 @@ public class NoteServiceImpl implements NoteService {
 	}
 
 	@Override
-	public void deleteAll() {
-		noteRepository.deleteAll();
+	public void deleteAll(Integer authorId) {
+		
+		List<Note> notes = this.getByAuthorId(authorId);
+		
+		noteRepository.delete(notes);
 
 	}
 

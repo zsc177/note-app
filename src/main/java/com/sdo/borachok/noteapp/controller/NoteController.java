@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,73 +24,70 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.sdo.borachok.noteapp.model.note.Note;
+import com.sdo.borachok.noteapp.security.model.AuthenticatedUser;
 import com.sdo.borachok.noteapp.service.NoteService;
 
 @Controller
-@RequestMapping("/api/v1/persons")
+@RequestMapping("/api/v1/notes")
 public class NoteController {
 
 	@Autowired
 	private NoteService noteService;
 
-	@PreAuthorize("#personId == principal.id")
-	@RequestMapping(value = "/{personId}/notes", method = GET)
-	public ResponseEntity<List<Note>> getAll(@PathVariable("personId") Integer personId) {
+	@RequestMapping(method = GET)
+	public ResponseEntity<List<Note>> getAll(@AuthenticationPrincipal AuthenticatedUser activeUser) {
 
-		List<Note> notes = noteService.getByAuthorId(personId);
+		List<Note> notes = noteService.getByAuthorId(activeUser.getId());
 
 		return new ResponseEntity<List<Note>>(notes, OK);
 	}
 
-	@PreAuthorize("#personId == principal.id")
-	@RequestMapping(value = "/{personId}/notes/{noteId}", method = GET)
-	public ResponseEntity<Note> get(@PathVariable("personId") Integer personId,
-			@PathVariable("noteId") Integer noteId) {
+	@RequestMapping(value = "/{id}", method = GET)
+	@PreAuthorize("@securityService.canAccessNote(#activeUser, #id)")
+	public ResponseEntity<Note> get(@PathVariable("id") Integer id,
+			@AuthenticationPrincipal AuthenticatedUser activeUser) {
 
-		Note note = noteService.getById(noteId);
+		Note note = noteService.getById(id);
 
 		return new ResponseEntity<Note>(note, OK);
 	}
 
-	@PreAuthorize("#personId == principal.id")
-	@RequestMapping(value = "/{personId}/notes/{noteId}", method = DELETE)
-	public ResponseEntity<Void> delete(@PathVariable("personId") Integer personId,
-			@PathVariable("noteId") Integer noteId) {
+	@RequestMapping(value = "/{id}", method = DELETE)
+	@PreAuthorize("@securityService.canAccessNote(#activeUser, #id)")
+	public ResponseEntity<Void> delete(@PathVariable("id") Integer id,
+			@AuthenticationPrincipal AuthenticatedUser activeUser) {
 
-		noteService.delete(noteId);
-
-		return new ResponseEntity<Void>(NO_CONTENT);
-	}
-
-	@PreAuthorize("#personId == principal.id")
-	@RequestMapping(value = "/{personId}/notes", method = DELETE)
-	public ResponseEntity<Void> deleteAll() {
-
-		noteService.deleteAll();
+		noteService.delete(id);
 
 		return new ResponseEntity<Void>(NO_CONTENT);
 	}
 
-	@PreAuthorize("#personId == principal.id")
-	@RequestMapping(value = "/{personId}/notes", method = POST)
-	public ResponseEntity<Note> create(@PathVariable("personId") Integer personId, @RequestBody @Valid Note note,
-			UriComponentsBuilder ucBuilder) {
+	@RequestMapping(method = DELETE)
+	public ResponseEntity<Void> deleteAll(@AuthenticationPrincipal AuthenticatedUser activeUser) {
 
-		note = noteService.create(personId, note);
+		noteService.deleteAll(activeUser.getId());
+
+		return new ResponseEntity<Void>(NO_CONTENT);
+	}
+
+	@RequestMapping(method = POST)
+	public ResponseEntity<Note> create(@RequestBody @Valid Note note, UriComponentsBuilder ucBuilder,
+			@AuthenticationPrincipal AuthenticatedUser activeUser) {
+
+		note = noteService.create(activeUser.getId(), note);
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(ucBuilder.path("api/v1/persons/{personId}/notes/{noteId}")
-				.buildAndExpand(personId, note.getId()).toUri());
+		headers.setLocation(ucBuilder.path("api/v1/{noteId}").buildAndExpand(note.getId()).toUri());
 
 		return new ResponseEntity<Note>(note, headers, CREATED);
 	}
 
-	@PreAuthorize("#personId == principal.id")
-	@RequestMapping(value = "/{personId}/notes/{noteId}", method = PUT)
-	public ResponseEntity<Note> update(@PathVariable("personId") Integer personId,
-			@PathVariable("noteId") Integer noteId, @RequestBody @Valid Note note) {
+	@PreAuthorize("@securityService.canAccessNote(#activeUser, #id)")
+	@RequestMapping(value = "/{id}", method = PUT)
+	public ResponseEntity<Note> update(@PathVariable("id") Integer id, @RequestBody @Valid Note note,
+			@AuthenticationPrincipal AuthenticatedUser activeUser) {
 
-		noteService.update(noteId, note);
+		noteService.update(id, note);
 
 		return new ResponseEntity<Note>(note, OK);
 	}
