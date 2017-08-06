@@ -34,11 +34,11 @@ public class LoginController {
 		Person currentPerson = personService.getByEmail(person.getEmail());
 
 		if (currentPerson == null) {
-			return new ResponseEntity<String>(HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 
 		if (!currentPerson.getPassword().equals(person.getPassword())) {
-			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 
 		JwtUserDto userDto = converter.convert(currentPerson);
@@ -46,6 +46,6 @@ public class LoginController {
 		String stringToken = JwtTokenGenerator.generateToken(userDto, SECRET);
 		String jsonToken = "{\"token\":\"" + stringToken + "\"}";
 
-		return new ResponseEntity<String>(jsonToken, OK);
+		return new ResponseEntity<>(jsonToken, OK);
 	}
 }
